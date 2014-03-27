@@ -93,11 +93,13 @@ public class MainActivity extends Activity {
 					e.printStackTrace();
 				}
 				return null;
+				
 			}
 
 			@Override
 			protected void onPostExecute(String result) {
 				textView.setText(result);
+				progress.dismiss();
 			}
 		};
 
