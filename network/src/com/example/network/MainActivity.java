@@ -14,6 +14,7 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -34,6 +35,8 @@ public class MainActivity extends Activity {
 	private EditText editText;
 	private ProgressDialog progress;
 	private TextView latTextView, lngTextView;
+	protected static final String CLIENT_ID = "S1LC42PP1ZRDU5VWZIIZBIVOVACP4DXX0R5SVSXBQHJS3UP1";
+	protected static final String CLIENT_SECRET = "FCB500VP5QGJEH3GYNHRICNMLZMWXLEOOM0FK30ET5RHTIUC";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,22 +91,8 @@ public class MainActivity extends Activity {
 						stringBuilder.append(line);
 					}
 
-					return stringBuilder.toString();
+					String result = stringBuilder.toString();
 
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return null;
-				
-			}
-
-			@Override
-			protected void onPostExecute(String result) {
-				try {
 					JSONObject data = new JSONObject(result);
 					JSONObject location = data.getJSONArray("results")
 							.getJSONObject(0).getJSONObject("geometry")
@@ -111,15 +100,57 @@ public class MainActivity extends Activity {
 					double lat = location.getDouble("lat");
 					double lng = location.getDouble("lng");
 
-					latTextView.setText("lat:" + lat);
-					lngTextView.setText("lng:" + lng);
+					String urlstr2 = String
+							.format("https://api.foursquare.com/v2/venues/search?client_id=%s&client_secret=%s&v=20130815&ll=%s&query=%s",
+									CLIENT_ID, CLIENT_SECRET, lat + "," + lng,
+									"sushi");
 
+					url = new URL(urlstr2);
+					connection = url.openConnection();
+
+					buffer = new BufferedReader(new InputStreamReader(
+							connection.getInputStream()));
+
+					stringBuilder = new StringBuilder();
+					while ((line = buffer.readLine()) != null) {
+						stringBuilder.append(line);
+					}
+
+					String result2 = stringBuilder.toString();
+
+					return result2;
+
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				return null;
 				
-				textView.setText(result);
+			}
+
+			protected void onPostExecute(String result) {
+
+				try {
+					JSONObject object = new JSONObject(result);
+					JSONArray array = object.getJSONObject("response")
+							.getJSONArray("venues");
+					String names = "";
+					for (int i = 0; i < array.length(); i++) {
+						String name = array.getJSONObject(i).getString("name");
+						names += name + "\n";
+					}
+					textView.setText(names);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 				progress.dismiss();
 			}
 		};
