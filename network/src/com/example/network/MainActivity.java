@@ -3,9 +3,11 @@ package com.example.network;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -47,7 +49,13 @@ public class MainActivity extends Activity {
 	}
 
 	public void fetch(View view) {
-		String address = editText.getText().toString();
+//		String address = editText.getText().toString();
+		String address = "";
+		try {
+			address = URLEncoder.encode(editText.getText().toString(), "utf-8");
+		} catch (UnsupportedEncodingException  e1) {
+			e1.printStackTrace();
+		}
 		final String urlStr = String
 				.format("http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false",
 						address);
